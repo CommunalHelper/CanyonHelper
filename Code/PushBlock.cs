@@ -38,8 +38,11 @@ namespace Celeste.Mod.CanyonHelper
 
         private MTexture[] stickyTextureArray = new MTexture[4];
 
-        public PushBlock(EntityData data, Vector2 offset) : base(data.Position + offset, 32, 32, false)
-        {
+        private bool persistent;
+        private int entityID;
+
+
+        public PushBlock(EntityData data, Vector2 offset) : base(data.Position + offset, 32, 32, false) {
             stickyTextures = GFX.Game.GetAtlasSubtextures("objects/canyon/pushblock/stickyGoo").ToArray();
             OnDashCollide = new DashCollision(OnDashed);
             Collider.Center = Vector2.Zero;
@@ -50,6 +53,9 @@ namespace Celeste.Mod.CanyonHelper
             stickyRight = data.Bool("stickyRight", false);
 
             isTemple = data.Bool("isTemple", false);
+
+            persistent = data.Bool("persistent", false);
+            entityID = data.ID;
 
             for (int i = 0; i < stickyTextureArray.Length; i++)
             {
@@ -69,6 +75,11 @@ namespace Celeste.Mod.CanyonHelper
             base.Added(scene);
             level = SceneAs<Level>();
             dashSwitches = scene.Entities.OfType<DashSwitch>().ToArray<DashSwitch>();
+            if (level.Session.GetFlag("pushblockspersist_" + level.Session.Level.ToString() + entityID))
+            {
+                Position = new Vector2(level.Session.GetCounter("pushblocksX_" + level.Session.Level.ToString() + entityID),
+                                       level.Session.GetCounter("pushblocksY_" + level.Session.Level.ToString() + entityID));
+            }
         }
 
         private DashCollisionResults OnDashed(Player player, Vector2 direction)
@@ -102,9 +113,20 @@ namespace Celeste.Mod.CanyonHelper
             return result;
         }
 
+        private void UpdatePersistentPositions() 
+        {
+            if (persistent) 
+            {
+                level.Session.SetFlag("pushblockspersist_" + level.Session.Level.ToString() + entityID);
+                level.Session.SetCounter("pushblocksX_" + level.Session.Level.ToString() + entityID, (int)Position.X);
+                level.Session.SetCounter("pushblocksY_" + level.Session.Level.ToString() + entityID, (int)Position.Y);
+            }
+        }
+
         public override void Update()
         {
             base.Update();
+            UpdatePersistentPositions();
             ApplyGravityCheck();
             if (delayBetweenImpactEffect > 0)
             {

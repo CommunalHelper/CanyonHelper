@@ -5,6 +5,7 @@ entities.canyon/pushblock.attributes.description.stickyBottom=Whether the bottom
 entities.canyon/pushblock.attributes.description.stickyLeft=Whether the left part is sticky.
 entities.canyon/pushblock.attributes.description.stickyRight=Whether the right part is sticky.
 entities.canyon/pushblock.attributes.description.isTemple=Whether it uses the temple sprite rather than the default.
+entities.canyon/pushblock.attributes.description.persistent=Whether the block saves its position despite the player dying/screen transitioning.
 
 # Spin Orb
 entities.canyon/spinorb.placements.name.SpinOrb=Spin Orb (Canyon)

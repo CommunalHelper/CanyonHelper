@@ -31,7 +31,8 @@ const placements = Ahorn.PlacementDict(
             "stickyBottom" => false,
             "stickyLeft" => false,
             "stickyRight" => false,
-            "isTemple" => false
+            "isTemple" => false,
+            "persistent" => false
         )
     ),
     "Toggle Block (Canyon)" => Ahorn.EntityPlacement(

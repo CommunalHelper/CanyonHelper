@@ -12,7 +12,8 @@ pushblock.placements =
         ["stickyBottom"] = false,
         ["stickyLeft"] = false,
         ["stickyRight"] = false,
-        ["isTemple"] = false
+        ["isTemple"] = false,
+        ["persistent"] = false
     }
 }
 
