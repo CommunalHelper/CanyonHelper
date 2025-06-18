@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FMOD;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -69,7 +70,7 @@ namespace Celeste.Mod.CanyonHelper
             Collider = new Circle(8.5f, -0.5f, 0f);
             Add(new PlayerCollider(OnPlayer, null, null));
             Add(light = new VertexLight(Color.White, 1f, 16, 32));
-
+            
             // backwards compat in case someone used sprites.xml to overwrite sprites previously
             if (spritePath.Equals("")) {
                 Add(sprite = CanyonModule.SpriteBank.Create("spinorb"));
@@ -81,8 +82,8 @@ namespace Celeste.Mod.CanyonHelper
                 sprite.Add("playerenter", "enter", 0.2f, new Chooser<string>("active"), 0, 1, 2);
                 sprite.Add("active", "active", 0.2f, 0, 1, 2);
                 sprite.Play("idle");
-                sprite.Rotation = initialAngle + spriteRotationOffset;
             }
+            sprite.Rotation = initialAngle + spriteRotationOffset;
             
             Add(dashListener = new DashListener());
             dashListener.OnDash = OnPlayerDashed;
@@ -100,6 +101,13 @@ namespace Celeste.Mod.CanyonHelper
             outline.Visible = false;
             outline.Add(image);
             scene.Add(outline);
+        }
+
+        public override void Removed(Scene scene) {
+            if (moveSfx != null) {
+                moveSfx.stop(STOP_MODE.ALLOWFADEOUT);
+                moveSfx.release();
+            }
         }
 
         public override void Awake(Scene scene)
