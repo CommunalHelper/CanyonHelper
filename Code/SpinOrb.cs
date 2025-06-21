@@ -58,7 +58,8 @@ namespace Celeste.Mod.CanyonHelper
             ColorMode = ParticleType.ColorModes.Blink
         };
 
-        public SpinOrb(EntityData data, Vector2 offset) : base(data.Position + offset) {
+        public SpinOrb(EntityData data, Vector2 offset) : base(data.Position + offset)
+        {
             rotateCounterclockwise = data.Bool("rotateCounterclockwise", false);
             // in degrees, 0° = right
             float initialRotateAngleDegrees = data.Float("initialAngle", 270);
@@ -72,9 +73,12 @@ namespace Celeste.Mod.CanyonHelper
             Add(light = new VertexLight(Color.White, 1f, 16, 32));
             
             // backwards compat in case someone used sprites.xml to overwrite sprites previously
-            if (spritePath.Equals("")) {
+            if (spritePath.Equals(""))
+            {
                 Add(sprite = CanyonModule.SpriteBank.Create("spinorb"));
-            } else {
+            }
+            else
+            {
                 if (!spritePath.EndsWith("/")) spritePath += "/";
                 Add(sprite = new Sprite(GFX.Game, spritePath));
                 sprite.Justify = new Vector2(0.5f, 0.5f);
@@ -103,9 +107,11 @@ namespace Celeste.Mod.CanyonHelper
             scene.Add(outline);
         }
 
-        public override void Removed(Scene scene) {
+        public override void Removed(Scene scene)
+        {
             base.Removed(scene);
-            if (moveSfx != null) {
+            if (moveSfx != null)
+            {
                 moveSfx.stop(STOP_MODE.ALLOWFADEOUT);
                 moveSfx.release();
             }
@@ -199,9 +205,12 @@ namespace Celeste.Mod.CanyonHelper
                     currentRotateSpeed = normalRotateSpeed;
                 }
                 sprite.Rotation = currentRotateAngle + spriteRotationOffset;
-                if (rotateCounterclockwise) {
+                if (rotateCounterclockwise)
+                {
                     currentRotateAngle -= currentRotateSpeed * Engine.DeltaTime;
-                } else {
+                }
+                else
+                {
                     currentRotateAngle += currentRotateSpeed * Engine.DeltaTime;
                 }
             }
@@ -262,7 +271,8 @@ namespace Celeste.Mod.CanyonHelper
 
         private void OnPlayerDashed(Vector2 direction)
         {
-            if (playerInOrb) {
+            if (playerInOrb)
+            {
                 shouldShowTutorial = false;
                 sprite.Play("idle", true);
                 playerInOrb = false;
