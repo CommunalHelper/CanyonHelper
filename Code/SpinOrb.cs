@@ -104,6 +104,7 @@ namespace Celeste.Mod.CanyonHelper
         }
 
         public override void Removed(Scene scene) {
+            base.Removed(scene);
             if (moveSfx != null) {
                 moveSfx.stop(STOP_MODE.ALLOWFADEOUT);
                 moveSfx.release();
@@ -261,8 +262,7 @@ namespace Celeste.Mod.CanyonHelper
 
         private void OnPlayerDashed(Vector2 direction)
         {
-            if (playerInOrb)
-            {
+            if (playerInOrb) {
                 shouldShowTutorial = false;
                 sprite.Play("idle", true);
                 playerInOrb = false;
