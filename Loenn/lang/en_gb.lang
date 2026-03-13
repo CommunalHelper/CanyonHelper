@@ -13,6 +13,9 @@ entities.canyon/pushblock.attributes.description.customDebrisFromTileset=The deb
 
 # Spin Orb
 entities.canyon/spinorb.placements.name.SpinOrb=Spin Orb (Canyon)
+entities.canyon/spinorb.attributes.description.initialAngle=Starting angle of the spin orb (in degrees, 0°=right, 90°=down).
+entities.canyon/spinorb.attributes.description.spritePath=Path for the folder with the textures of the spin orb, relative to Graphics/Atlases/Gameplay/.\nThe folder is expected to contain the textures active00, active01, active02, enter00, enter01, enter02 and idle00.
+entities.canyon/spinorb.attributes.description.rotateCounterclockwise=When not set, the orb will rotate clockwise. When set, the orb will rotate counterclockwise.
 
 # Toggle Block
 entities.canyon/toggleblock.placements.name.ToggleBlock=Toggle Block (Canyon)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FMOD;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,17 +23,19 @@ namespace Celeste.Mod.CanyonHelper
         private const float fastRotateSpeed = MathHelper.Pi * 3f;
         private const float slowRotateSpeed = MathHelper.Pi * 0.75f;
         private float currentRotateSpeed = normalRotateSpeed;
-        private const float rotateRadius = 12f;
         private const float launchSpeed = 350f;
         private const float maxUseDelay = 1.5f;
-        private const float rotationOffset = MathHelper.PiOver2;
+        private const float spriteRotationOffset = MathHelper.PiOver2;
+        
+        // if set to false, rotate clockwise (default)
+        private bool rotateCounterclockwise;
 
         List<Debris> debris = new List<Debris>();
         private bool debrisShaken = false;
         private bool debrisReturned = false; //Size 10 & fix stars not spawning in correct area
 
-        private Vector2 pivotPoint;
-        private float currentRotateAngle = -MathHelper.Pi / 2;
+        private float initialAngle;
+        private float currentRotateAngle;
         private float useDelay = 0;
 
         private Player playerEntity;
@@ -57,11 +60,35 @@ namespace Celeste.Mod.CanyonHelper
 
         public SpinOrb(EntityData data, Vector2 offset) : base(data.Position + offset)
         {
+            rotateCounterclockwise = data.Bool("rotateCounterclockwise", false);
+            // in degrees, 0° = right
+            float initialRotateAngleDegrees = data.Float("initialAngle", 270);
+            // convert to radians
+            initialAngle = initialRotateAngleDegrees * (MathHelper.Pi / 180f);
+            string spritePath = data.Attr("spritePath", "");
+            
             Depth = -8500;
             Collider = new Circle(8.5f, -0.5f, 0f);
             Add(new PlayerCollider(OnPlayer, null, null));
             Add(light = new VertexLight(Color.White, 1f, 16, 32));
-            Add(sprite = CanyonModule.SpriteBank.Create("spinorb"));
+            
+            // backwards compat in case someone used sprites.xml to overwrite sprites previously
+            if (spritePath.Equals(""))
+            {
+                Add(sprite = CanyonModule.SpriteBank.Create("spinorb"));
+            }
+            else
+            {
+                if (!spritePath.EndsWith("/")) spritePath += "/";
+                Add(sprite = new Sprite(GFX.Game, spritePath));
+                sprite.Justify = new Vector2(0.5f, 0.5f);
+                sprite.Add("idle", "idle", 0.2f, 0);
+                sprite.Add("playerenter", "enter", 0.2f, new Chooser<string>("active"), 0, 1, 2);
+                sprite.Add("active", "active", 0.2f, 0, 1, 2);
+                sprite.Play("idle");
+            }
+            sprite.Rotation = initialAngle + spriteRotationOffset;
+            
             Add(dashListener = new DashListener());
             dashListener.OnDash = OnPlayerDashed;
         }
@@ -69,7 +96,6 @@ namespace Celeste.Mod.CanyonHelper
         public override void Added(Scene scene)
         {
             base.Added(scene);
-            pivotPoint = Position;
             //outline
             Image image = new Image(GFX.Game["objects/canyon/spinorb/outline"]);
             image.CenterOrigin();
@@ -79,6 +105,16 @@ namespace Celeste.Mod.CanyonHelper
             outline.Visible = false;
             outline.Add(image);
             scene.Add(outline);
+        }
+
+        public override void Removed(Scene scene)
+        {
+            base.Removed(scene);
+            if (moveSfx != null)
+            {
+                moveSfx.stop(STOP_MODE.ALLOWFADEOUT);
+                moveSfx.release();
+            }
         }
 
         public override void Awake(Scene scene)
@@ -115,7 +151,7 @@ namespace Celeste.Mod.CanyonHelper
                 player.Speed = Vector2.Zero;
                 player.RefillDash();
                 player.RefillStamina();
-                currentRotateAngle = -rotationOffset;//in radians
+                currentRotateAngle = initialAngle;//in radians
                 playerEntity = player;
             }
         }
@@ -168,8 +204,15 @@ namespace Celeste.Mod.CanyonHelper
                 {
                     currentRotateSpeed = normalRotateSpeed;
                 }
-                sprite.Rotation = currentRotateAngle + rotationOffset;
-                currentRotateAngle += currentRotateSpeed * Engine.DeltaTime;
+                sprite.Rotation = currentRotateAngle + spriteRotationOffset;
+                if (rotateCounterclockwise)
+                {
+                    currentRotateAngle -= currentRotateSpeed * Engine.DeltaTime;
+                }
+                else
+                {
+                    currentRotateAngle += currentRotateSpeed * Engine.DeltaTime;
+                }
             }
             else
             {
@@ -253,8 +296,8 @@ namespace Celeste.Mod.CanyonHelper
                     StarBurst starBurst = Engine.Pooler.Create<StarBurst>().Init(Center, Calc.AngleToVector(currentRotateAngle + i * MathHelper.Pi / 72, 1f));
                     Scene.Add(starBurst);
                 }
-                currentRotateAngle = -rotationOffset;
-                sprite.Rotation = 0;
+                currentRotateAngle = initialAngle;
+                sprite.Rotation = initialAngle + spriteRotationOffset;
                 Visible = false;
                 Collidable = false;
                 BreakParticles();
